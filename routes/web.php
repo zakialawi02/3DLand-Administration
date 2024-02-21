@@ -30,6 +30,7 @@ Route::prefix('data/parcel')->group(function () {
     Route::post('/save', [ParcelController::class, 'store'])->name('parcel.save');
     Route::delete('/{parcel_id}/delete', [ParcelController::class, 'destroy'])->name('parcel.delete');
     Route::get('/{parcel_id}/edit', [ParcelController::class, 'edit'])->name('parcel.edit');
+    Route::put('/{parcel_id}/update', [ParcelController::class, 'update'])->name('parcel.update');
 });
 Route::prefix('data/resident')->group(function () {
     Route::get('/', [ResidentController::class, 'index'])->name('resident.index');

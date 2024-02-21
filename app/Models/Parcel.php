@@ -24,22 +24,41 @@ class Parcel extends Model
         'parcel_occupant',
     ];
 
-    public function getParcel()
+    public function getParcel($parcel_id = false)
     {
-        $parcel_table = Parcel::select('parcel_table.*', 'residents_table.*')
-            ->selectRaw('JSON_ARRAYAGG(
-                    JSON_OBJECT(
-                        "id_keyword", uri_table.id_keyword,
-                        "word_name", uri_table.word_name,
-                        "slug", uri_table.slug,
-                        "isUrl", uri_table.isUrl
-                    )
-                ) AS tag')
-            ->leftJoin('linked_uri', 'parcel_table.parcel_id', '=', 'linked_uri.parcel_id')
-            ->leftJoin('residents_table', 'parcel_table.parcel_occupant', '=', 'residents_table.id_resident')
-            ->leftJoin('uri_table', 'linked_uri.id_keyword', '=', 'uri_table.id_keyword')
-            ->groupBy('parcel_table.id', 'parcel_table.parcel_id', 'parcel_table.parcel_name', 'parcel_table.parcel_occupant')
-            ->get();
-        return $parcel_table;
+        if ($parcel_id != false) {
+            $parcel_table = Parcel::select('parcel_table.*', 'residents_table.*')
+                ->selectRaw('JSON_ARRAYAGG(
+                        JSON_OBJECT(
+                            "id_keyword", uri_table.id_keyword,
+                            "word_name", uri_table.word_name,
+                            "slug", uri_table.slug,
+                            "isUrl", uri_table.isUrl
+                        )
+                    ) AS tag')
+                ->leftJoin('linked_uri', 'parcel_table.parcel_id', '=', 'linked_uri.parcel_id')
+                ->leftJoin('residents_table', 'parcel_table.parcel_occupant', '=', 'residents_table.id_resident')
+                ->leftJoin('uri_table', 'linked_uri.id_keyword', '=', 'uri_table.id_keyword')
+                ->where('parcel_table.parcel_id', $parcel_id)
+                ->groupBy('parcel_table.id', 'parcel_table.parcel_id', 'parcel_table.parcel_name', 'parcel_table.parcel_occupant')
+                ->first();
+            return $parcel_table;
+        } else {
+            $parcel_table = Parcel::select('parcel_table.*', 'residents_table.*')
+                ->selectRaw('JSON_ARRAYAGG(
+                        JSON_OBJECT(
+                            "id_keyword", uri_table.id_keyword,
+                            "word_name", uri_table.word_name,
+                            "slug", uri_table.slug,
+                            "isUrl", uri_table.isUrl
+                        )
+                    ) AS tag')
+                ->leftJoin('linked_uri', 'parcel_table.parcel_id', '=', 'linked_uri.parcel_id')
+                ->leftJoin('residents_table', 'parcel_table.parcel_occupant', '=', 'residents_table.id_resident')
+                ->leftJoin('uri_table', 'linked_uri.id_keyword', '=', 'uri_table.id_keyword')
+                ->groupBy('parcel_table.id', 'parcel_table.parcel_id', 'parcel_table.parcel_name', 'parcel_table.parcel_occupant')
+                ->get();
+            return $parcel_table;
+        }
     }
 }

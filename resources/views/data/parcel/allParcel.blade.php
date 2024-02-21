@@ -70,7 +70,7 @@
                                         </td>
                                         <td>
                                             <div class="d-flex flex-row gap-1">
-                                                <a href="/data/parcel/edit-parcel.php?parcel=<?= $row['parcel_id'] ?>" class="btn xs-btn btn-secondary bi bi-pencil-square"></a>
+                                                <a href="{{ route('parcel.edit', ['parcel_id' => $row['parcel_id']]) }}" class="btn xs-btn btn-secondary bi bi-pencil-square"></a>
                                                 <form id="delete-{{ $row['parcel_id'] }}" action="{{ route('parcel.delete', ['parcel_id' => $row['parcel_id']]) }}" method="post">
                                                     @csrf
                                                     @method('DELETE')

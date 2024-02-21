@@ -94,9 +94,13 @@ class ParcelController extends Controller
      * @param  \App\Models\Parcel  $parcel
      * @return \Illuminate\Http\Response
      */
-    public function edit(Parcel $parcel)
+    public function edit($parcel_id)
     {
-        //
+        $dataResidents = Resident::all();
+        $dataURI = Uri::all();
+        $dataParcel = $this->parcel->getParcel($parcel_id);
+        // dd($dataResidents);
+        return view('data.parcel.editParcel', ['residents_table' => $dataResidents, 'uri_table' => $dataURI, 'parcel_table' => $dataParcel]);
     }
 
     /**
@@ -106,9 +110,62 @@ class ParcelController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $parcel_id)
     {
-        //
+        $parcel = Parcel::where('parcel_id', $parcel_id)->firstOrFail();
+        if ($parcel) {
+            $parcelId = $parcel->id;
+            $parcelIdNew = request('parcelIdNew');
+            $parcelName = request('parcelName');
+            $parcelOccupant = request('parcelOccupant', null);
+
+            if ($parcel_id != $parcelIdNew) {
+                // Check if new parcel_id already exists
+                $existingParcel = Parcel::where('parcel_id', $parcelIdNew)->first();
+
+                if ($existingParcel) {
+                    // Handle duplicate parcel_id
+                    session()->flash('error', 'Parcel id already exists');
+                    return redirect()->back();
+                }
+
+                // Delete old linked_uri records
+                LinkedUri::where('parcel_id', $parcel_id)->delete();
+
+                // Insert new linked_uri records
+                foreach (request('multiSelectTag', []) as $tagId) {
+                    LinkedUri::create(['parcel_id' => $parcel_id, 'id_keyword' => $tagId]);
+                }
+
+                // Update parcel data
+                $parcel->update([
+                    'parcel_id' => $parcelIdNew,
+                    'parcel_name' => $parcelName,
+                    'parcel_occupant' => $parcelOccupant,
+                ]);
+            } else {
+                // Delete old linked_uri records
+                LinkedUri::where('parcel_id', $parcel_id)->delete();
+
+                // Insert new linked_uri records
+                foreach (request('multiSelectTag', []) as $tagId) {
+                    LinkedUri::create(['parcel_id' => $parcel_id, 'id_keyword' => $tagId]);
+                }
+
+                // Update parcel data
+                $parcel->update([
+                    'parcel_id' => $parcel_id,
+                    'parcel_name' => $parcelName,
+                    'parcel_occupant' => $parcelOccupant,
+                ]);
+            }
+
+            session()->flash('success', 'Data updated successfully');
+        } else {
+            session()->flash('error', 'Failed, Data not found');
+        }
+
+        return redirect()->route('parcel.index');
     }
 
     /**
